@@ -37,7 +37,7 @@ ENV SUPERCRONIC_VERSION "0.2.30"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV YQ_VERSION "4.44.2"
+ENV YQ_VERSION "4.44.3"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV SURICATA_VERSION_PATTERN "1:7.0.*"
@@ -108,7 +108,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     apt-get install -q -y --no-install-recommends -t bookworm-backports \
         suricata=${SURICATA_VERSION_PATTERN} \
         suricata-update && \
-    python3 -m pip install --break-system-packages --no-compile --no-cache-dir watchdog && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir watchdog==4.0.2 && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \

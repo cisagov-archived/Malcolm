@@ -1,6 +1,6 @@
 ARG TARGETPLATFORM=linux/amd64
 
-FROM --platform=${TARGETPLATFORM} docker.elastic.co/beats/filebeat-oss:8.14.3
+FROM --platform=${TARGETPLATFORM} docker.elastic.co/beats/filebeat-oss:8.15.0
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -66,10 +66,10 @@ ENV SUPERCRONIC_VERSION "0.2.30"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV YQ_VERSION "4.44.2"
+ENV YQ_VERSION "4.44.3"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
-ENV EVTX_VERSION "0.8.2"
+ENV EVTX_VERSION "0.8.3"
 ENV EVTX_URL "https://github.com/omerbenamram/evtx/releases/download/v${EVTX_VERSION}/evtx_dump-v${EVTX_VERSION}-XXX-unknown-linux-gnu"
 
 USER root
@@ -101,7 +101,7 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
         unar \
         unzip \
         xz-utils && \
-    python3 -m pip install --no-compile --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog && \
+    python3 -m pip install --no-compile --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog==4.0.2 && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
