@@ -6,26 +6,27 @@
     - [Setup](#ISOSetup)
     - [Time synchronization](time-sync.md#ConfigTime)
 
-Malcolm's Docker-based deployment model allows Malcolm to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
+Malcolm's container-based deployment model allows Malcolm to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
 
 Malcolm can be packaged into an installer ISO based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/). This [customized Debian installation](https://wiki.debian.org/DebianLive) is preconfigured with the bare minimum software needed to run Malcolm.
 
 ## <a name="ISOBuild"></a>Generating the ISO
 
-Official downloads of the Malcolm installer ISO are not provided: however, it can be built easily on an Internet-connected Linux host with Vagrant:
+Official downloads of the Malcolm installer ISO [can be downloaded](download.md#DownloadISOs) from the GitHub releases page. It can also be built easily on an Internet-connected system with Vagrant:
 
 * [Vagrant](https://www.vagrantup.com/)
-    - [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin
     - [`vagrant-sshfs`](https://github.com/dustymabe/vagrant-sshfs) plugin
     - [`bento/debian-12`](https://app.vagrantup.com/bento/boxes/debian-12) Vagrant box
 
-The build should work with either the [VirtualBox](https://www.virtualbox.org/) provider or the [libvirt](https://libvirt.org/) provider:
+The build should work with a variety of [Vagrant providers](https://developer.hashicorp.com/vagrant/docs/providers):
 
-* [VirtualBox](https://www.virtualbox.org/) [provider](https://www.vagrantup.com/docs/providers/virtualbox)
-    - [`vagrant-vbguest`](https://github.com/dotless-de/vagrant-vbguest) plugin
+* [VMware](https://www.vmware.com/) [provider](https://developer.hashicorp.com/vagrant/docs/providers/vmware)
+    - [`vagrant-vmware-desktop`](https://github.com/hashicorp/vagrant-vmware-desktop) plugin
 * [libvirt](https://libvirt.org/) 
     - [`vagrant-libvirt`](https://github.com/vagrant-libvirt/vagrant-libvirt) provider plugin
     - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-12`](https://app.vagrantup.com/bento/boxes/debian-12) Vagrant box to `libvirt` format
+* [VirtualBox](https://www.virtualbox.org/) [provider](https://developer.hashicorp.com/vagrant/docs/providers/virtualbox)
+    - [`vagrant-vbguest`](https://github.com/dotless-de/vagrant-vbguest) plugin
 
 To perform a clean build of the Malcolm installer ISO, navigate to the local Malcolm working copy and run:
 
@@ -41,20 +42,20 @@ Building the ISO may take 30 minutes or more depending on the system. As the bui
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-24.08.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-24.10.0.iso"
 …
 ```
 
-By default, Malcolm's Docker images are not packaged with the installer ISO. Malcolm assumes instead that users will pull the [latest images](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) with a `docker compose --profile malcolm pull` command as described in the [Quick start](quickstart.md#QuickStart) section. To build an ISO with the latest Malcolm images included, follow the directions to create [pre-packaged installation files](development.md#Packager), which include a tarball with a name such as `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz`. Then, pass that images tarball to the ISO build script with a `-d`, like this:
+By default, Malcolm's images are not packaged with the installer ISO. Malcolm assumes instead that users will pull the [latest images](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) with a `docker compose --profile malcolm pull` command as described in the [Quick start](quickstart.md#QuickStart) section. To build an ISO with the latest Malcolm images included, follow the directions to create [pre-packaged installation files](development.md#Packager), which include a tarball with a name such as `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz`. Then, pass that images tarball to the ISO build script with a `-d`, like this:
 
 ```
 $ ./malcolm-iso/build_via_vagrant.sh -f -d malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz
 …
 ```
 
-A system installed from the resulting ISO will load the Malcolm Docker images upon first boot. This method is desirable when the ISO is to be installed in an "air gapped" environment or for distribution to non-networked machines.
+A system installed from the resulting ISO will load the Malcolm images upon first boot. This method is desirable when the ISO is to be installed in an "air gapped" environment or for distribution to non-networked machines.
 
-Alternately, if users have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the docker images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](#ISO) installer ISOs - specifically [`malcolm-iso-build-docker-wrap-push-ghcr.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) for the Malcolm ISO. Users must run the workflows to build and push the fork's Malcolm docker images before building the ISO. The resulting ISO file is wrapped in a Docker image that provides an HTTP server from which the ISO may be downloaded.
+Alternately, if users have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](#ISO) installer ISOs - specifically [`malcolm-iso-build-docker-wrap-push-ghcr.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) for the Malcolm ISO. Users must run the workflows to build and push the fork's Malcolm images before building the ISO. The resulting ISO file is wrapped in a image that provides an HTTP server from which the ISO may be downloaded.  See [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners) for more information.
 
 ## <a name="ISOInstallation"></a>Installation
 
@@ -82,7 +83,7 @@ Following these prompts, the installer will reboot and the Malcolm base operatin
 
 ## <a name="ISOSetup"></a>Setup
 
-When the system boots for the first time, the Malcolm Docker images will load if the installer was built with pre-packaged installation files as described above. Wait for this operation to continue (the progress dialog will disappear when they have finished loading) before continuing the setup.
+When the system boots for the first time, the Malcolm images will load if the installer was built with pre-packaged installation files as described above. Wait for this operation to continue (the progress dialog will disappear when they have finished loading) before continuing the setup.
 
 Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](quickstart.md#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](authsetup.md#AuthSetup) to configure authentication. If the ISO does not include pre-packaged Malcolm images, or to retrieve the latest updates, run `docker compose --profile malcolm pull`. Finalize the configuration by running `scripts/configure` and follow the prompts as illustrated in the [installation example](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig).
 
